@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    command: postgres -c 'max_connections=100'
+    networks:
+      - stocktrack-network
+    environment:
+      - POSTGRES_USER=stocktrack_user
+      - POSTGRES_PASSWORD=STpass123
+      - POSTGRES_DB=stocktrack_db
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stocktrack-api
+    depends_on:
+      - postgres
+    volumes:
+      - .:/root/task
+    working_dir: /root/task
+    ports:
+      - "8000:8000"
+    networks:
+      - stocktrack-network
+networks:
+  stocktrack-network:
+    driver: bridge
